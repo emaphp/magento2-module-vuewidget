@@ -1,0 +1,25 @@
+{
+  "name": "emaphp/magento2-module-vuewidget",
+  "description": "Vue.js widgets for Magento 2",
+  "type": "magento2-module",
+  "version": "1.0.0",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Emmanuel Antico",
+      "email": "emmanuel.antico@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "magento/module-widget": ">100.0.0"
+  },
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Vue\\Widget\\": ""
+    }
+  }
+}
