@@ -1,0 +1,27 @@
+{
+  "name": "magento2-module-vuewidget",
+  "version": "1.0.0",
+  "description": "Vue.js widgets for Magento 2",
+  "main": "rollup.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "vue",
+    "magento",
+    "widget"
+  ],
+  "author": "Emmanuel Antico <emmanuel.antico@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.7.2",
+    "@babel/preset-env": "^7.7.1",
+    "rollup": "^1.26.3",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-magento2": "^1.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-vue": "^5.1.2",
+    "vue-template-compiler": "^2.6.10"
+  }
+}
