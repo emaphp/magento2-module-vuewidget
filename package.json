@@ -4,6 +4,7 @@
   "description": "Vue.js widgets for Magento 2",
   "main": "rollup.config.js",
   "scripts": {
+    "build": "rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
