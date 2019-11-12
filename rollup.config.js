@@ -22,4 +22,21 @@ export default [
       magento2(),
     ]
   },
+  {
+    input: './assets/frontend/components/VueHelloWorld.vue',
+    output: {
+      file: './view/frontend/web/js/components/VueHelloWorld.js',
+      format: 'iife',
+      name: 'bundle',
+    },
+    plugins: [
+      babel({
+        exclude: 'node_modules/**'
+      }),
+      resolve(),
+      commonjs(),
+      vue(),
+      magento2(),
+    ]
+  },
 ];
