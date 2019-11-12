@@ -65,22 +65,30 @@ The process of adding components to your app will consist on these steps:
  * Compile the component with `rollup`.
  * Clear cache.
 
-This module assumes you're already familiar with building Vue.js components, so we'll only cover the second step. By default, Magento is not able to understand files using the `.vue` extension (or anything using ES6/ES7). To solve this, this repo includes a build system that allows you to turn these files into something that can be included within the page through *RequireJS*. The process starts by defining which files need to be transpiled. That info can be found within `rollup.config.js`. The structure of this file is pretty straightforward: an array containing which files should be transpiled and what plugins are required to do so. Create a file inside `assets/frontend/components/` called `MyVueWidget.vue` and put the following content:
+This module assumes you're already familiar with building Vue.js components, so we'll only cover the second step. By default, Magento is not able to understand files using the `.vue` extension (or anything using ES6/ES7). To solve this, this repo includes a build system that allows you to turn these files into something that can be included within the page through *RequireJS*. The process starts by defining which files need to be transpiled. That info can be found within `rollup.config.js`. The structure of this file is pretty straightforward: an array containing which files should be transpiled and what plugins are required to do so. Create a file inside `assets/frontend/components/` called `VueCounter.vue` and put the following content:
 
 ```vue
-<!-- File: assets/frontend/components/MyVueWidget.vue -->
+<!-- File: assets/frontend/components/VueCounter.vue -->
 
 <template>
-  <h3>{{message}}</h3>
+  <button class="action primary" type="button" title="Vue Counter" v-on:click="increment">
+    <span>Count: {{count}}</span>
+  </button>
 </template>
 
 <script>
 export default {
   data () {
     return {
-      message: 'Hello World!'
+      count: 0
     }
   },
+
+  methods: {
+    increment: function () {
+      this.count++;
+    }
+  }
 }
 </script>
 ```
@@ -89,9 +97,9 @@ Now, in order to translate this file to plain Javascript we need to add an addit
 
 ```javascript
   {
-    input: './assets/frontend/components/MyVueWidget.vue',
+    input: './assets/frontend/components/VueCounter.vue',
     output: {
-      file: './view/frontend/web/js/components/MyVueWidget.js',
+      file: './view/frontend/web/js/components/VueCounter.js',
       format: 'iife',
       name: 'bundle',
     },
@@ -107,7 +115,7 @@ Now, in order to translate this file to plain Javascript we need to add an addit
   }
 ```
 
-This entry tells `rollup` to transpile the file we just created and put the resulting content on `view/frontend/web/js/components/MyVueWidget.js`, which can now be loaded as a regular Javascript module. To transpile this file you need to open a terminal and run the following (make sure you're on the module directory):
+This entry tells `rollup` to transpile the file and put the resulting content on `view/frontend/web/js/components/VueCounter.js`, which can now be loaded as a regular Javascript module. To transpile this file you need to open a terminal and run the following (make sure you're on the module directory):
 
 ```
 npm run build
@@ -123,13 +131,13 @@ We will create a new alias for this component by adding the following line in `r
 var config = {
   map: {
     '*': {
-      'MyVueWidget': 'Vue_Widget/js/components/MyVueWidget
+      'VueCounter': 'Vue_Widget/js/components/VueCounter'
     }
   }
 };
 ```
 
-Now, login as admin and repeat the steps described in the *Quick Start* guide. When reaching the *Widget Options* section, simply enter *MyVueWidget* on the *Component* field. Clear cache and reload the page.
+Now, login as admin and repeat the steps described in the *Quick Start* guide. When reaching the *Widget Options* section, simply enter *VueCounter* on the *Component* field. Clear cache and reload the page.
 
 ### Vue blocks
 
@@ -139,14 +147,14 @@ Widgets are nice but they are kind of limited. For example, you are not able to 
 <!-- File: view/frontend/templates/vue-block-example.phtml -->
 
 <div id="vue-block-example">
-    <hello-vue-widget name="<?php echo $this->getCustomerName() ?>" />
+    <vue-customer-greeting name="<?php echo $this->getCustomerName() ?>" />
 </div>
 <script type="text/x-magento-init">
  {
    "#vue-block-example": {
      "vueapp": {
        "components": [
-         "HelloVueWidget"
+         "VueCustomerGreeting"
        ]
      }
    }
@@ -157,6 +165,8 @@ Widgets are nice but they are kind of limited. For example, you are not able to 
 This example introduces a simple greeting component that reads a prop from PHP. The component should look like this:
 
 ```vue
+<!-- File: assets/frontend/components/VueCustomerGreeting.vue -->
+
 <template>
   <h5>Hello {{name}}! Welcome to our store.</h5>
 </template>
@@ -168,7 +178,7 @@ export default {
 </script>
 ```
 
-We will register this component as `HelloVueWidget` inside `requirejs-config.js`:
+We will register this component as `VueCustomerGreeting`:
 
 ```javascript
 // File: view/frontend/requirejs-config.js
@@ -176,13 +186,13 @@ We will register this component as `HelloVueWidget` inside `requirejs-config.js`
 var config = {
   map: {
     '*': {
-      'HelloVueWidget': 'Vue_Widget/js/components/HelloVueWidget'
+      'VueCustomerGreeting': 'Vue_Widget/js/components/VueCustomerGreeting'
     }
   }
 };
 ```
 
-The block class can be used to initialize any values that need to be provided to your component.
+The block class purpose is to initialize any values that need to be provided to your component.
 
 ```php
 <?php
@@ -228,6 +238,8 @@ Vue blocks are just regular `.phtml` blocks so they are included using the stand
 </page>
 ```
 
+Run `npm run build` and clear cache to see the changes.
+
 ### Data provider
 
 There will be times that you'll need to pass data to a component as an array (or an object). Encoding them as props might work at first but it's kind of cumbersome. In order to pass complex data to a component we'll use a *data provider*. A *data provider* is a form of *dependency injection* that will allow you to share a set of data across all components within a block. This object will be generated whenever you set a `provider` property on the `vueapp` initializer.
@@ -255,6 +267,7 @@ There will be times that you'll need to pass data to a component as an array (or
 </script>
 ```
 
+Both the block class implementation and the alias declaration are just like all other examples.
 
 ```php
 <?php
@@ -281,8 +294,8 @@ class DataProviderExample extends Template implements BlockInterface {
         return [
             'Pants',
             'T-Shirts',
-            'Glasses',
-            'Shoes'
+            'Shoes',
+            'Ties'
         ];
     }
     
@@ -296,9 +309,11 @@ class DataProviderExample extends Template implements BlockInterface {
 }
 ```
 
-In order to access the injected values, we use the `get()` method on the `$provider` property:
+Now, what differs is the way we access these values. In order to do that, we use the `get()` method on the `$provider` property:
 
-```vue
+```javascript
+// File: assets/frontend/components/DataProviderComponent.vue
+
 export default {
   mounted() {
     const { categories, author } = this.$provider.get();
@@ -306,13 +321,13 @@ export default {
 };
 ```
 
-You could also pass the property key, which also support nested paths.
+You could also pass the property key. Keys can also be expressed as paths.
 
 ```javascript
 // Single key
 const categories = this.$provider.get('categories'); // [ 'Pants', 'T-Shirts', ... ]
 
-// Nested path
+// Path
 const role = this.$provider.get('author.role'); // "Developer"
 ```
 
@@ -341,7 +356,43 @@ Vue blocks can include a placeholder within their layout to provide a temporal U
 
 ### Importing Magento modules
 
-[TODO]
+There will be times that you'll have to access Javascript modules already provided by Magento. For example, you might need to generate changes on the DOM using *jQuery* or do a calculation using *Underscore*. We can achieve this by providing an extra option to the transpilation process. The Magento plugin used in `rollup.config.js` supports an option called `virtualDir` that allow us to simulate a generic import to an existing module. No real import is performed, but the script, once transpiled, will state that it depends on those modules. The example below shows an entry setting the `virtualDir` optionL=:
+
+```javascript
+  {
+    input: './assets/frontend/components/ExampleWidget.vue',
+    output: {
+      file: './view/frontend/web/js/components/ExampleWidget.js',
+      format: 'iife',
+      name: 'bundle',
+    },
+    plugins: [
+      babel({
+        exclude: 'node_modules/**'
+      }),
+      resolve(),
+      commonjs(),
+      vue(),
+      magento2({
+        virtualDir: 'magento'
+      }),
+    ]
+  },
+```
+
+Now, when importing a Javascript module, prefix the module's name with the *virtual directory*. You need to add an extra `@` symbol at the start.
+
+```vue
+<script>
+// File: assets/frontend/components/ExampleWidget.vue
+
+import $ from '@magento/jquery';
+
+// ...
+</script>
+```
+
+Once transpiled, the script will add any module you imported from the *virtual directory* to the list of dependencies. That way, we make sure the script will only run once those scripts are loaded.
 
 ### Component libraries
 
@@ -398,6 +449,10 @@ var config = {
 ```
 
 In order to retrieve the components within a library we'll add a special syntax element to the mix. To retrieve the `FancyButton` component from `Fancy_Lib` we'll write `Fancy_Lib::FancyButton`. This rule applies both to widgets and apps.
+
+### Logs
+
+This module implements a simple logger class that can be injected into any block class. Many of the examples use this class to generate debugging messages. You can find these messages on `var/log/vuewidget.log`. Remember to activate *developer mode* beforehand.
 
 ## License
 
