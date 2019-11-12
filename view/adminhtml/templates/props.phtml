@@ -1,0 +1,15 @@
+<div id="vue-widget-props">
+    <widget-props fieldname="<?php echo $block->getData('field_name') ?>" fieldid="<?php echo $block->getData('field_id') ?>" />
+</div>
+<script type="text/x-magento-init">
+ {
+   "#vue-widget-props": {
+     "vueapp": {
+       "components": [ "WidgetProps" ],
+       "provider": {
+         "props": <?php echo json_encode($block->getData('props')) ?>
+       }
+     }
+   }
+ }
+</script>

@@ -1,0 +1,13 @@
+<?php $__widgetId = $block->getWidgetId(); ?>
+<div id="<?php echo $__widgetId ?>"></div>
+<script type="text/x-magento-init">
+ {
+   "#<?php echo $__widgetId ?>": {
+     "vuewidget": {
+       "component": "<?php echo $block->getWidgetName() ?>",
+       "props": <?php echo json_encode($block->getWidgetProps(), JSON_FORCE_OBJECT) ?>,
+       "parent": "<?php echo $__widgetId ?>"
+     }
+   }
+ }
+</script>

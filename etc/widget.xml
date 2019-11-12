@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
+  <widget id="vue_widget" class="Vue\Widget\Block\Widget\VueWidget">
+    <label translate="true">Vue Widget</label>
+    <description>Vue Widget</description>
+    <parameters>
+      <parameter name="component" xsi:type="text" required="true" visible="true">
+        <label>Component</label>
+      </parameter>
+      <parameter name="props" xsi:type="block" required="false" visible="true">
+        <label>Props</label>
+        <block class="Vue\Widget\Block\Adminhtml\Widget\Type\Props" />
+      </parameter>
+    </parameters>
+  </widget>
+</widgets>
