@@ -47,11 +47,11 @@ php bin/magento cache:clean
 
 Login as admin. Go to *Stores* > *Settings* > *Configuration*. You should be able to see a new option at the bottom called *Vue Widget*. Now, from the main menu, go to *Content* > *Elements* > *Widgets*. Click on *Add Widget*. On the *Settings* section, click on the *Type* field. A *Vue Widget* option should appear. After selecting where the widget should appear, you'll arrive at the *Widget Options* section.
 
-[TODO]
+![New Widget](https://drive.google.com/uc?export=view&id=1DeV-wssxOGNppjQivWDs1i9D16PPPArY "")
 
 Widgets are included by name; that is, the id used to register them on `requirejs-config.js`. Try entering `VueHelloWorld` on the *Component* field. Then, click on the *Add* button on the form below. This component supports a single `prop` called `name`. Entering a *prop* is pretty straighforward, just fill the *Name* and *Value* columns. Then, hit *Save*.
 
-[TODO]
+![Widget Props](https://drive.google.com/uc?export=view&id=182HW9G34SQWXlC-U_eF6HaFeuaBuCWg- "")
 
 Clear cache and refresh the page. You should be able to view your widget on the page you selected.
 
