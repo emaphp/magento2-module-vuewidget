@@ -12,13 +12,13 @@ This module assumes you are running Magento >=2.2. You'll also need [Rollup](htt
 
 ## Quick start
 
-Enter the `code/` directory and clone the repo:
+Enter the `app/code/` directory and clone the repo:
 
 ```
-cd code/ && git clone https://github.com/emaphp/magento2-module-vuewidget Vue/Widget
+cd app/code/ && git clone https://github.com/emaphp/magento2-module-vuewidget Vue/Widget
 ```
 
-Install frontend dependencies. You can use either `npm` or `yarn`:
+Install Node dependencies. You can use either `npm` or `yarn`:
 
 ```
 cd Vue/Widget && npm install
@@ -115,13 +115,13 @@ Now, in order to translate this file to plain Javascript we need to add an addit
   }
 ```
 
-This entry tells `rollup` to transpile the file and put the resulting content on `view/frontend/web/js/components/VueCounter.js`, which can now be loaded as a regular Javascript module. To transpile this file you need to open a terminal and run the following (make sure you're on the module directory):
+This entry tells `rollup` to transpile the file and put the resulting content in `view/frontend/web/js/components/VueCounter.js`, which will let us run it as a regular Javascript module. To transpile this file you need to open a terminal and run the following (make sure you're on the module directory):
 
 ```
 npm run build
 ```
 
-`rollup` will now run each entry and generate each bundle separately. This build system uses [rollup-plugin-magento2](https://github.com/emaphp/rollup-plugin-magento2) internally to wrap each bundle into something that can be imported using *RequireJS*. Once this process is finished, your module is compiled and can now be injected into the site as a widget.
+`rollup` will now run each entry and generate each bundle separately. This build system uses [rollup-plugin-magento2](https://github.com/emaphp/rollup-plugin-magento2) internally to wrap each bundle into something that can be imported using *RequireJS*. Once this process is finished, your module is compiled and can now be used as a widget.
 
 We will create a new alias for this component by adding the following line in `requirejs-config.js`:
 
@@ -223,7 +223,7 @@ class VueBlockExample extends Template implements BlockInterface {
 }
 ```
 
-Vue blocks are just regular `.phtml` blocks so they are included using the standard layout system:
+Vue blocks are just regular `.phtml` blocks so they are included using the XML layout system:
 
 ```xml
 <?xml version="1.0"?>
@@ -267,7 +267,7 @@ There will be times that you'll need to pass data to a component as an array (or
 </script>
 ```
 
-Both the block class implementation and the alias declaration are just like all other examples.
+Both of these values will be provided by the block instance directly.
 
 ```php
 <?php
@@ -309,7 +309,7 @@ class DataProviderExample extends Template implements BlockInterface {
 }
 ```
 
-Now, what differs is the way we access these values. In order to do that, we use the `get()` method on the `$provider` property:
+Now, to access these values within our component we'll invoke the `get` method on the `$provider` property.
 
 ```javascript
 // File: assets/frontend/components/DataProviderComponent.vue
@@ -341,13 +341,13 @@ Vue blocks can include a placeholder within their layout to provide a temporal U
 ```html
 <div id="placeholder-example">
     <h3 role="placeholder">Loading...</h3>
-    <my-component></my-component>
+    <slow-widget></slow-widget>
 </div>
 <script type="text/x-magento-init">
  {
    "#placeholder-example": {
      "vueapp": {
-       "components": [ "MyVueWidget" ]
+       "components": [ "SlowWidget" ]
      }
    }
  }
@@ -356,13 +356,13 @@ Vue blocks can include a placeholder within their layout to provide a temporal U
 
 ### Importing Magento modules
 
-There will be times that you'll have to access Javascript modules already provided by Magento. For example, you might need to generate changes on the DOM using *jQuery* or do a calculation using *Underscore*. We can achieve this by providing an extra option to the transpilation process. The Magento plugin used in `rollup.config.js` supports an option called `virtualDir` that allow us to simulate a generic import to an existing module. No real import is performed, but the script, once transpiled, will state that it depends on those modules. The example below shows an entry setting the `virtualDir` optionL=:
+There will be times that you'll have to access Javascript modules already provided by Magento. For example, you might need to generate changes on the DOM using *jQuery* or do a calculation using *Underscore*. We can achieve this by providing an extra option to the transpilation process. The Magento plugin used in `rollup.config.js` supports an option called `virtualDir` that allow us to simulate a generic import to an existing module. No real import is performed, but the script, once transpiled, will state that it depends on those modules. The example below shows an entry setting the `virtualDir` option:
 
 ```javascript
   {
-    input: './assets/frontend/components/ExampleWidget.vue',
+    input: './assets/frontend/components/ImportExampleWidget.vue',
     output: {
-      file: './view/frontend/web/js/components/ExampleWidget.js',
+      file: './view/frontend/web/js/components/ImportExampleWidget.js',
       format: 'iife',
       name: 'bundle',
     },
@@ -380,11 +380,11 @@ There will be times that you'll have to access Javascript modules already provid
   },
 ```
 
-Now, when importing a Javascript module, prefix the module's name with the *virtual directory*. You need to add an extra `@` symbol at the start.
+Now, when importing a Javascript module, prefix the module's name with the *virtual directory*. You need to add an extra `@` symbol at the beginning.
 
 ```vue
 <script>
-// File: assets/frontend/components/ExampleWidget.vue
+// File: assets/frontend/components/ImportExampleWidget.vue
 
 import $ from '@magento/jquery';
 
@@ -392,7 +392,7 @@ import $ from '@magento/jquery';
 </script>
 ```
 
-Once transpiled, the script will add any module you imported from the *virtual directory* to the list of dependencies. That way, we make sure the script will only run once those scripts are loaded.
+Once transpiled, the script will add any module you imported from the *virtual directory* to the list of dependencies. That way, we make sure the script will only run after those scripts are loaded.
 
 ### Component libraries
 
@@ -450,9 +450,37 @@ var config = {
 
 In order to retrieve the components within a library we'll add a special syntax element to the mix. To retrieve the `FancyButton` component from `Fancy_Lib` we'll write `Fancy_Lib::FancyButton`. This rule applies both to widgets and apps.
 
-### Logs
+```html
+<div id="library-example">
+    <fancy-button></fancy/button>
+</div>
+<script type="text/x-magento-init">
+ {
+   "#library-example": {
+     "vueapp": {
+       "components": [ "Fancy_Lib::FancyButton" ]
+     }
+   }
+ }
+</script>
+```
+
+### Extras
+
+#### Administration widgets
+
+This module already comes with an administration widget called `WidgetProps`, which you can find in `assets/adminhtml/components`. This widget is the one responsible for storing the component props on the database. If you plan to change or add more administration widgets remember to properly clear the `adminhtml` cache as well (which will be located in `pub/static/adminhtml/THEME_DIR`). Otherwise you might not see any changes during development.
+
+As an additional note, the `Widget\Instance` class on the `Magento_Widget` module is overriden to allow props to be provided as an object once they are pushed to frontend. Check out the `Vue\Widget\Model\Widget\Intance` class for details.
+
+#### Logs
 
 This module implements a simple logger class that can be injected into any block class. Many of the examples use this class to generate debugging messages. You can find these messages on `var/log/vuewidget.log`. Remember to activate *developer mode* beforehand.
+
+## TODOs
+
+ - [ ] Fix importing modules using desctructuring.
+ - [ ] Production builds.
 
 ## License
 
