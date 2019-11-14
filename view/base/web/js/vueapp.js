@@ -1,7 +1,8 @@
 define(['vue', 'vueutil'], function (Vue, VueUtil) {
+  var placeholderSelector = '[role=placeholder]';
+
   return function (opts, el) {
     var components = opts.components || [];
-    var options = opts.options || {};
 
     var paths = components.map(function (cmpt) {
       return VueUtil.getComponentPath(cmpt);
@@ -19,15 +20,19 @@ define(['vue', 'vueutil'], function (Vue, VueUtil) {
         components[path[1]] = path[0] === false ? args[idx] : args[idx][path[1]];
       });
 
-      var placeholder = Element.prototype.querySelector.call(el, '[role=placeholder]');
-      if (placeholder) {
-        el.removeChild(placeholder);
+      // By default, remove the placeholder once script finishes loading
+      if (!opts.placeholder) {
+        var placeholder = Element.prototype.querySelector.call(el, placeholderSelector);
+        if (placeholder) {
+          el.removeChild(placeholder);
+        }
       }
 
       new Vue({
         el: el,
         components: components,
-        provider: VueUtil.buildProvider(opts.provider || {})
+        provider: VueUtil.buildProvider(opts.provider || {}),
+        placeholder: { option: opts.placeholder, selector: placeholderSelector }
       });
     });
   };
