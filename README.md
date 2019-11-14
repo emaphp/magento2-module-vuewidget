@@ -373,14 +373,14 @@ export default {
 };
 ```
 
-Since we're now dealing with the placeholder directly we need to include an extra property on the `vueapp` initializer:
+Since we're now dealing with the placeholder directly, we need to include an extra property on the `vueapp` initializer:
 
 ```html
 <!-- File: view/frontend/templates/custom-placeholder.phtml -->
 
 <div id="custom-placeholder">
     <h3 role="placeholder">Loading...</h3>
-    <custom-placeholder-component></custom-placeholder>
+    <custom-placeholder-component></custom-placeholder-component>
 </div>
 <script type="text/x-magento-init">
  {
@@ -419,7 +419,7 @@ Placeholders can also be affected by a given event. For that to happen we need t
 </script>
 ```
 
-When the `loaded` event is triggered, the component will call the `hide` method on the placeholder object. Now the component should trigger this event through `$emit`.
+When the `loaded` event is triggered, the component will call the `hide` method on the placeholder object. Alternatively, a `remove` method is also available.
 
 ```javascript
 // File: assets/frontend/components/CustomPlaceholderComponent.vue
@@ -440,7 +440,32 @@ export default {
 };
 ```
 
-You can also use `loaded:remove` or even specify a custom method. For example, `loaded:myCustomMethod` will invoke `myCustomMethod` passing a single argument corresponding to the placeholder node.
+You can also specify a custom method. That method needs to be declared within `methods` and accept a single argument representing the placeholder node.
+
+```html
+<!-- File: view/frontend/templates/placeholder-event.phtml -->
+
+<script type="text/x-magento-init">
+ {
+   "#placeholder-event": {
+     "vueapp": {
+       "components": [ "PlaceholderEventComponent" ],
+       "placeholder": "loaded:fadeOut"
+     }
+   }
+ }
+</script>
+```
+
+```javascript
+{
+  methods: {
+    fadeOut(placeholder) {
+      placeholder.classList.add('animate', 'fadeOutDown');
+    }
+  }
+}
+```
 
 ### Importing Magento modules
 
