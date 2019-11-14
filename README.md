@@ -352,7 +352,7 @@ Vue blocks can include a placeholder within their layout to provide a temporal U
 </script>
 ```
 
-Sometimes you might want to delay even more the removal of a placeholder (for example, right after data has been fetch from the server). This can be done by adding a mixin to your main component that gives access to the placeholder element. The `placeholderMixin` injects a `$placeholder` property into your component that provides 2 methods: `hide` and `remove`.
+There are scenarios in which you might want to delay the removal of a placeholder even more (for example, right after a fetch). This can be done by adding the `placeholderMixin`mixin to your main component. This mixin injects a `$placeholder` property into your component that provides 2 methods: `hide` and `remove`.
 
 ```javascript
 // File: assets/frontend/components/CustomPlaceholderComponent.vue
@@ -394,7 +394,7 @@ Since we're now dealing with the placeholder directly, we need to include an ext
 </script>
 ```
 
-By setting this property now the app will ignore any placeholder element within the block body.
+By setting this property, the app will now ignore any placeholder element within the block body.
 
 #### Events
 
@@ -419,7 +419,7 @@ Placeholders can also be affected by a given event. For that to happen we need t
 </script>
 ```
 
-When the `loaded` event is triggered, the component will call the `hide` method on the placeholder object. Alternatively, a `remove` method is also available.
+When the `loaded` event is triggered, the component will call the `hide` method of the placeholder object. A `remove` method is also available.
 
 ```javascript
 // File: assets/frontend/components/CustomPlaceholderComponent.vue
@@ -499,6 +499,7 @@ Now, when importing a Javascript module, prefix the module's name with the *virt
 // File: assets/frontend/components/ImportExampleWidget.vue
 
 import $ from '@magento/jquery';
+import _ from '@magento/underscore';
 ```
 
 Once transpiled, the script will add any module you imported from the *virtual directory* to the list of dependencies. That way, we make sure the script will only run after those scripts are loaded.
