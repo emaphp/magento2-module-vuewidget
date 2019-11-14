@@ -4,7 +4,7 @@ Vue.js widgets for Magento 2.
 
 ## About
 
-This is Magento 2 module skeleton for building and displaying widgets made with [Vue.js](https://vuejs.org/).
+This is Magento 2 module skeleton for building and displaying widgets made with [Vue.js](https://vuejs.org/). It comes with Vue.js 2.x plus some scripts and components to get you started.
 
 ## Requirements
 
@@ -223,9 +223,11 @@ class VueBlockExample extends Template implements BlockInterface {
 }
 ```
 
-Vue blocks are just regular `.phtml` blocks so they are included using the XML layout system:
+Vue blocks are just regular `.phtml` blocks so they are included using the XML layout system. The example below will add this block to the front page.
 
 ```xml
+<!-- File: view/frontend/layout/cms_index_index.xml -->
+
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
@@ -238,11 +240,11 @@ Vue blocks are just regular `.phtml` blocks so they are included using the XML l
 </page>
 ```
 
-Run `npm run build` and clear cache to see the changes.
+Add this new component to the entry list in `rollup.config.js`. Run `npm run build`, rebuild the layout and clear cache. You should now be able to see the changes.
 
 ### Data provider
 
-There will be times that you'll need to pass data to a component as an array (or an object). Encoding them as props might work at first but it's kind of cumbersome. In order to pass complex data to a component we'll use a *data provider*. A *data provider* is a form of *dependency injection* that will allow you to share a set of data across all components within a block. This object will be generated whenever you set a `provider` property on the `vueapp` initializer.
+There will be times that you'll need to pass data to a component as an array/object. Encoding them as props might work at first but doing that for each value it's kind of cumbersome. In order to pass complex data to a component we'll use a common pattern used in Vue components called *Data Provider*. A *Data Provider* is a form of *dependency injection* that will allow you to share a set of data across all components within a block. This object will be generated whenever you set a `provider` property on the `vueapp` initializer.
 
 ```html
 <!-- File: view/frontend/templates/data-provider-example.phtml -->
@@ -298,7 +300,7 @@ class DataProviderExample extends Template implements BlockInterface {
             'Ties'
         ];
     }
-    
+ 
     public function getAuthor() {
       return [
         'name'   => "Emma",
@@ -309,16 +311,10 @@ class DataProviderExample extends Template implements BlockInterface {
 }
 ```
 
-Now, to access these values within our component we'll invoke the `get` method on the `$provider` property.
+Now, to access these values from within our component we'll invoke the `get` method on the `$provider` property.
 
 ```javascript
-// File: assets/frontend/components/DataProviderComponent.vue
-
-export default {
-  mounted() {
-    const { categories, author } = this.$provider.get();
-  }
-};
+const { categories, author } = this.$provider.get();
 ```
 
 You could also pass the property key. Keys can also be expressed as paths.
@@ -339,6 +335,8 @@ Vue blocks can include a placeholder within their layout to provide a temporal U
  * They must be a direct child of the app container.
  
 ```html
+<!-- File: view/frontend/templates/placeholder-example.phtml -->
+
 <div id="placeholder-example">
     <h3 role="placeholder">Loading...</h3>
     <slow-widget></slow-widget>
@@ -354,9 +352,99 @@ Vue blocks can include a placeholder within their layout to provide a temporal U
 </script>
 ```
 
+Sometimes you might want to delay even more the removal of a placeholder (for example, right after data has been fetch from the server). This can be done by adding a mixin to your main component that gives access to the placeholder element. The `placeholderMixin` injects a `$placeholder` property into your component that provides 2 methods: `hide` and `remove`.
+
+```javascript
+// File: assets/frontend/components/CustomPlaceholderComponent.vue
+
+import placeholderMixin from '../mixins/placeholderMixin';
+
+export default {
+  mixins: [ placeholderMixin ],
+  
+  mounted() {
+    fetch('https://api.spacexdata.com/v3/launches/latest')
+    .then(response => response.json())
+    .then(data => {
+      // ...
+      this.$placeholder.hide();
+    });
+  }
+};
+```
+
+Since we're now dealing with the placeholder directly we need to include an extra property on the `vueapp` initializer:
+
+```html
+<!-- File: view/frontend/templates/custom-placeholder.phtml -->
+
+<div id="custom-placeholder">
+    <h3 role="placeholder">Loading...</h3>
+    <custom-placeholder-component></custom-placeholder>
+</div>
+<script type="text/x-magento-init">
+ {
+   "#example-placeholder": {
+     "vueapp": {
+       "components": [ "CustomPlaceholderComponent" ],
+       "placeholder": "custom"
+     }
+   }
+ }
+</script>
+```
+
+By setting this property now the app will ignore any placeholder element within the block body.
+
+#### Events
+
+Placeholders can also be affected by a given event. For that to happen we need to provide a `placeholder` value matching the `event:action` syntax:
+
+```html
+<!-- File: view/frontend/templates/placeholder-event.phtml -->
+
+<div id="placeholder-event">
+    <h3 role="placeholder">Loading...</h3>
+    <placeholder-event-component />
+</div>
+<script type="text/x-magento-init">
+ {
+   "#placeholder-event": {
+     "vueapp": {
+       "components": [ "PlaceholderEventComponent" ],
+       "placeholder": "loaded:hide"
+     }
+   }
+ }
+</script>
+```
+
+When the `loaded` event is triggered, the component will call the `hide` method on the placeholder object. Now the component should trigger this event through `$emit`.
+
+```javascript
+// File: assets/frontend/components/CustomPlaceholderComponent.vue
+
+import placeholderMixin from '../mixins/placeholderMixin';
+
+export default {
+  mixins: [ placeholderMixin ],
+  
+  mounted() {
+    fetch('https://api.spacexdata.com/v3/launches/latest')
+    .then(response => response.json())
+    .then(data => {
+      // ...
+      this.$emit('loaded');
+    });
+  }
+};
+```
+
+You can also use `loaded:remove` or even specify a custom method. For example, `loaded:myCustomMethod` will invoke `myCustomMethod` passing a single argument corresponding to the placeholder node.
+
 ### Importing Magento modules
 
-There will be times that you'll have to access Javascript modules already provided by Magento. For example, you might need to generate changes on the DOM using *jQuery* or do a calculation using *Underscore*. We can achieve this by providing an extra option to the transpilation process. The Magento plugin used in `rollup.config.js` supports an option called `virtualDir` that allow us to simulate a generic import to an existing module. No real import is performed, but the script, once transpiled, will state that it depends on those modules. The example below shows an entry setting the `virtualDir` option:
+There will be times that you'll have to access Javascript modules already provided by Magento. For example, you might need to generate changes on the DOM using *jQuery* or do a calculation using *Underscore*. We can achieve this by providing an extra option to the transpilation process. The Magento plugin used in `rollup.config.js` supports an option called `virtualDir` that allow us to simulate a generic import to a Javascript module. No real import is performed. Instead, the script, once transpiled, will state that it depends on those imported modules. The example below shows an entry setting the `virtualDir` option:
 
 ```javascript
   {
@@ -377,19 +465,15 @@ There will be times that you'll have to access Javascript modules already provid
         virtualDir: 'magento'
       }),
     ]
-  },
+  }
 ```
 
 Now, when importing a Javascript module, prefix the module's name with the *virtual directory*. You need to add an extra `@` symbol at the beginning.
 
-```vue
-<script>
+```javascript
 // File: assets/frontend/components/ImportExampleWidget.vue
 
 import $ from '@magento/jquery';
-
-// ...
-</script>
 ```
 
 Once transpiled, the script will add any module you imported from the *virtual directory* to the list of dependencies. That way, we make sure the script will only run after those scripts are loaded.
@@ -399,7 +483,7 @@ Once transpiled, the script will add any module you imported from the *virtual d
 Another clever technique is putting all you components within a single file. This is useful for cases when you are reusing a lot of components on different pages. A library script would look like this:
 
 ```javascript
-// File: assets/frontend/lib.js
+// File: assets/frontend/fancy_lib.js
 
 import Vue from '@magento/vue';
 
@@ -416,9 +500,9 @@ We then add the following entry in `rollup.config.js`:
 
 ```javascript
   {
-    input: './assets/frontend/lib.js',
+    input: './assets/frontend/fancy_lib.js',
     output: {
-      file: './view/frontend/web/js/lib.js',
+      file: './view/frontend/web/js/fancy_lib.js',
       format: 'iife',
       name: 'bundle',
     },
@@ -442,7 +526,7 @@ Then, we create the following alias in `requirejs-config.js`:
 var config = {
   map: {
     '*': {
-      'Fancy_Lib: 'Vue_Widget/js/lib'
+      'Fancy_Lib: 'Vue_Widget/js/fancy_lib'
     }
   }
 };
@@ -451,8 +535,10 @@ var config = {
 In order to retrieve the components within a library we'll add a special syntax element to the mix. To retrieve the `FancyButton` component from `Fancy_Lib` we'll write `Fancy_Lib::FancyButton`. This rule applies both to widgets and apps.
 
 ```html
+<!-- File: view/frontend/templates/library-example.phtml -->
+
 <div id="library-example">
-    <fancy-button></fancy/button>
+    <fancy-button></fancy-button>
 </div>
 <script type="text/x-magento-init">
  {
@@ -465,21 +551,21 @@ In order to retrieve the components within a library we'll add a special syntax 
 </script>
 ```
 
-### Extras
+## Extras
 
-#### Administration widgets
+### Administration widgets
 
 This module already comes with an administration widget called `WidgetProps`, which you can find in `assets/adminhtml/components`. This widget is the one responsible for storing the component props on the database. If you plan to change or add more administration widgets remember to properly clear the `adminhtml` cache as well (which will be located in `pub/static/adminhtml/THEME_DIR`). Otherwise you might not see any changes during development.
 
 As an additional note, the `Widget\Instance` class on the `Magento_Widget` module is overriden to allow props to be provided as an object once they are pushed to frontend. Check out the `Vue\Widget\Model\Widget\Intance` class for details.
 
-#### Logs
+### Logs
 
-This module implements a simple logger class that can be injected into any block class. Many of the examples use this class to generate debugging messages. You can find these messages on `var/log/vuewidget.log`. Remember to activate *developer mode* beforehand.
+This module implements a simple logger class that can be injected into any block through dependency injection. Many of the examples use this class to generate debugging messages. You can find these messages on `var/log/vuewidget.log`. Remember to activate *developer mode* before starting.
 
 ## TODOs
 
- - [ ] Fix importing modules using desctructuring.
+ - [ ] Fix importing Magento modules using destructuring.
  - [ ] Production builds.
 
 ## License
