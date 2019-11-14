@@ -458,7 +458,9 @@ You can also specify a custom method. That method needs to be declared within `m
 ```
 
 ```javascript
-{
+// File: assets/frontend/components/PlaceholderEventComponent.vue
+
+export default {
   methods: {
     fadeOut(placeholder) {
       placeholder.classList.add('animate', 'fadeOutDown');
