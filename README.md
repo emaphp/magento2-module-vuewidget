@@ -45,7 +45,7 @@ php bin/magento cache:clean
 
 ## Usage
 
-Login as admin. Go to *Stores* > *Settings* > *Configuration*. You should be able to see a new option at the bottom called *Vue Widget*. Now, from the main menu, go to *Content* > *Elements* > *Widgets*. Click on *Add Widget*. On the *Settings* section, click on the *Type* field. A *Vue Widget* option should appear. After selecting where the widget should appear, you'll arrive at the *Widget Options* section.
+Login as admin. Go to *Stores* > *Settings* > *Configuration*. You should be able to see a new option at the bottom called *Vue Widget*. Now, from the main menu, go to *Content* > *Elements* > *Widgets*. Click on *Add Widget*. On the *Settings* section, click on the *Type* field. A *Vue Widget* option should appear at the bottom. Then pick the area where the widget should be included (for example, within *CMS Home Page*).
 
 ![New Widget](https://drive.google.com/uc?export=view&id=1DeV-wssxOGNppjQivWDs1i9D16PPPArY "")
 
@@ -61,9 +61,9 @@ Clear cache and refresh the page. You should be able to view your widget on the 
 
 The process of adding components to your app will consist on these steps:
 
- * Write the component using the `.vue` format.
- * Compile the component with `rollup`.
- * Clear cache.
+ * Write the component using the `.vue` syntax. Put it inside the `assets/frontend/components` folder.
+ * Compile the component using `rollup`.
+ * Deploy assets and clear cache.
 
 This module assumes you're already familiar with building Vue.js components, so we'll only cover the second step. By default, Magento is not able to understand files using the `.vue` extension (or anything using ES6/ES7). To solve this, this repo includes a build system that allows you to turn these files into something that can be included within the page through *RequireJS*. The process starts by defining which files need to be transpiled. That info can be found within `rollup.config.js`. The structure of this file is pretty straightforward: an array containing which files should be transpiled and what plugins are required to do so. Create a file inside `assets/frontend/components/` called `VueCounter.vue` and put the following content:
 
@@ -93,7 +93,7 @@ export default {
 </script>
 ```
 
-Now, in order to translate this file to plain Javascript we need to add an additional entry in `rollup.config.js`. It should look like this:
+Now, in order to transpile this file to plain Javascript we need to add an additional entry in `rollup.config.js`. It should look like this:
 
 ```javascript
   {
@@ -115,7 +115,7 @@ Now, in order to translate this file to plain Javascript we need to add an addit
   }
 ```
 
-This entry tells `rollup` to transpile the file and put the resulting content in `view/frontend/web/js/components/VueCounter.js`, which will let us run it as a regular Javascript module. To transpile this file you need to open a terminal and run the following (make sure you're on the module directory):
+This entry tells `rollup` to transpile the file and put the resulting content in `view/frontend/web/js/components/VueCounter.js`. Open a terminal and run the following command (make sure you're on the module directory):
 
 ```
 npm run build
@@ -317,12 +317,16 @@ Now, to access these values from within our component we'll invoke the `get` met
 const { categories, author } = this.$provider.get();
 ```
 
-You could also pass the property key. Keys can also be expressed as paths.
+You can also specify a property key. 
 
 ```javascript
 // Single key
 const categories = this.$provider.get('categories'); // [ 'Pants', 'T-Shirts', ... ]
+```
 
+Keys can be expressed as paths.
+
+```javascript
 // Path
 const role = this.$provider.get('author.role'); // "Developer"
 ```
@@ -352,7 +356,7 @@ Vue blocks can include a placeholder within their layout to provide a temporal U
 </script>
 ```
 
-There are scenarios in which you might want to delay the removal of a placeholder even more (for example, right after a fetch). This can be done by adding the `placeholderMixin`mixin to your main component. This mixin injects a `$placeholder` property into your component that provides 2 methods: `hide` and `remove`.
+There are scenarios in which you might want to delay the removal of a placeholder even more (for example, right after fetching data from the server). This can be done by adding the `placeholderMixin`mixin to your main component. This mixin injects a `$placeholder` property that provides 2 methods: `hide` and `remove`.
 
 ```javascript
 // File: assets/frontend/components/CustomPlaceholderComponent.vue
@@ -363,6 +367,7 @@ export default {
   mixins: [ placeholderMixin ],
   
   mounted() {
+    // Fetch data
     fetch('https://api.spacexdata.com/v3/launches/latest')
     .then(response => response.json())
     .then(data => {
@@ -430,6 +435,7 @@ export default {
   mixins: [ placeholderMixin ],
   
   mounted() {
+    // Fetch data
     fetch('https://api.spacexdata.com/v3/launches/latest')
     .then(response => response.json())
     .then(data => {
@@ -501,7 +507,7 @@ Now, when importing a Javascript module, prefix the module's name with the *virt
 // File: assets/frontend/components/ImportExampleWidget.vue
 
 import $ from '@magento/jquery';
-import _ from '@magento/underscore';
+import { debounce } from '@magento/underscore';
 ```
 
 Once transpiled, the script will add any module you imported from the *virtual directory* to the list of dependencies. That way, we make sure the script will only run after those scripts are loaded.
@@ -593,7 +599,6 @@ This module implements a simple logger class that can be injected into any block
 
 ## TODOs
 
- - [ ] Fix importing Magento modules using destructuring.
  - [ ] Production builds.
 
 ## License

@@ -17,7 +17,7 @@ const placeholderMixin = {
       }
     };
 
-    if (option.indexOf(':') != -1) {
+    if (option && option.indexOf(':') != -1) {
       // Setup event listener
       const [ event, action ] = option.split(':');
       if (action) {
