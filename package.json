@@ -4,7 +4,14 @@
   "description": "Vue.js widgets for Magento 2",
   "main": "rollup.config.js",
   "scripts": {
+    "setup": "cp ./node_modules/vue/dist/vue.js view/base/web/js/vue.js",
+    "setup:prod": "cp ./node_modules/vue/dist/vue.min.js view/base/web/js/vue.js",
+    "core": "rollup --config rollup.core.config.js",
+    "core:prod": "NODE_ENV=production rollup --config rollup.core.config.js",
     "build": "rollup -c",
+    "build:prod": "NODE_ENV=production rollup -c",
+    "dev": "npm run setup && npm run core && npm run build",
+    "prod": "NODE_ENV=production npm run setup:prod && npm run core:prod && npm run build:prod",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -23,6 +30,7 @@
     "rollup": "^2.74.1",
     "rollup-plugin-magento2": "^1.0.1",
     "rollup-plugin-vue": "^5.0.0",
+    "vue": "^2.6.14",
     "vue-template-compiler": "^2.6.14"
   }
 }
