@@ -2,6 +2,7 @@ import babel from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import magento2 from "rollup-plugin-magento2";
+import { terser } from "rollup-plugin-terser";
 
 export default [
   {
@@ -9,7 +10,8 @@ export default [
     output: {
       file: "./view/base/web/js/vueutil.requirejs.js",
       format: "iife",
-      name: "vueutil"
+      name: "vueutil",
+      sourcemap: process.env.NODE_ENV === "production" ? false : "inline"
     },
     plugins: [
       babel({
@@ -20,7 +22,8 @@ export default [
       commonjs(),
       magento2({
         virtualDir: "magento"
-      })
+      }),
+      process.env.NODE_ENV === "production" && terser()
     ]
   },
   {
@@ -28,7 +31,8 @@ export default [
     output: {
       file: "./view/base/web/js/vueapp.requirejs.js",
       format: "iife",
-      name: "vueapp"
+      name: "vueapp",
+      sourcemap: process.env.NODE_ENV === "production" ? false : "inline"
     },
     plugins: [
       babel({
@@ -39,7 +43,8 @@ export default [
       commonjs(),
       magento2({
         virtualDir: "magento"
-      })
+      }),
+      process.env.NODE_ENV === "production" && terser()
     ]
   },
   {
@@ -47,7 +52,8 @@ export default [
     output: {
       file: "./view/base/web/js/vuewidget.requirejs.js",
       format: "iife",
-      name: "vuewidget"
+      name: "vuewidget",
+      sourcemap: process.env.NODE_ENV === "production" ? false : "inline"
     },
     plugins: [
       babel({
@@ -58,7 +64,8 @@ export default [
       commonjs(),
       magento2({
         virtualDir: "magento"
-      })
+      }),
+      process.env.NODE_ENV === "production" && terser()
     ]
   }
 ];
