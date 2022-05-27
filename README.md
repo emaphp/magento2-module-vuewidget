@@ -1,16 +1,16 @@
-# VueWidget
+# VueWidget #
 
-Vue.js widgets for Magento 2.
+Vue 2 widgets for Magento 2.
 
-## About
+## About ##
 
-This is Magento 2 module skeleton for building and displaying widgets made with [Vue.js](https://vuejs.org/). It comes with Vue.js 2.x plus some scripts and components to get you started.
+This is Magento 2 module skeleton for building and displaying widgets made with [Vue.js](https://vuejs.org/) v2. It comes with with a simple build simple to get you started.
 
-## Requirements
+## Requirements ##
 
 This module assumes you are running Magento >=2.2. You'll also need [Rollup](https://rollupjs.org/) installed.
 
-## Quick start
+## Quick start ##
 
 Enter the `app/code/` directory and clone the repo:
 
@@ -24,13 +24,13 @@ Install Node dependencies. You can use either `npm` or `yarn`:
 cd Vue/Widget && npm install
 ```
 
-Do a first build. This will compile some generic components available on the `assets/` folder:
+Now do a first dev build. This will compile some generic components available on the `assets/` folder along with its dependencies:
 
 ```
-npm run build
+npm run dev
 ```
 
-Go back to the main application folder. Enable the module:
+Go back to the main application folder and enable the module:
 
 ```
 php bin/magento module:enable Vue_Widget --clear-static-content
@@ -43,7 +43,7 @@ Clear cache:
 php bin/magento cache:clean
 ```
 
-## Usage
+## Usage ##
 
 Login as admin. Go to *Stores* > *Settings* > *Configuration*. You should be able to see a new option at the bottom called *Vue Widget*. Now, from the main menu, go to *Content* > *Elements* > *Widgets*. Click on *Add Widget*. On the *Settings* section, click on the *Type* field. A *Vue Widget* option should appear at the bottom. Then pick the area where the widget should be included (for example, within *CMS Home Page*).
 
@@ -55,9 +55,9 @@ Widgets are included by name; that is, the id used to register them on `requirej
 
 Clear cache and refresh the page. You should be able to view your widget on the page you selected.
 
-## In-Depth
+## In-Depth ##
 
-### Adding components
+### Adding components ###
 
 The process of adding components to your app will consist on these steps:
 
@@ -139,7 +139,7 @@ var config = {
 
 Now, login as admin and repeat the steps described in the *Quick Start* guide. When reaching the *Widget Options* section, simply enter *VueCounter* on the *Component* field. Clear cache and reload the page.
 
-### Vue blocks
+### Vue blocks ###
 
 Widgets are nice but they are kind of limited. For example, you are not able to pass a prop directly from PHP. Because of this, an extended script called `vueapp` is provided as an alternative. `vueapp` lets you inject Vue components into your regular HTML blocks. When used this way, the block acts as a component container. Any component that is displayed within must be listed inside the `components` property:
 
@@ -242,7 +242,7 @@ Vue blocks are just regular `.phtml` blocks so they are included using the XML l
 
 Add this new component to the entry list in `rollup.config.js`. Run `npm run build`, rebuild the layout and clear cache. You should now be able to see the changes.
 
-### Data provider
+### Data provider ###
 
 There will be times that you'll need to pass data to a component as an array/object. Encoding them as props might work at first but doing that for each value it's kind of cumbersome. In order to pass complex data to a component we'll use a common pattern used in Vue components called *Data Provider*. A *Data Provider* is a form of *dependency injection* that will allow you to share a set of data across all components within a block. This object will be generated whenever you set a `provider` property on the `vueapp` initializer.
 
@@ -331,7 +331,7 @@ Keys can be expressed as paths.
 const role = this.$provider.get('author.role'); // "Developer"
 ```
 
-### Placeholders
+### Placeholders ###
 
 Vue blocks can include a placeholder within their layout to provide a temporal UI. These  will be removed automatically once the component is initialized. Placeholder elements have the following properties:
 
@@ -389,7 +389,7 @@ Since we're now dealing with the placeholder directly, we need to include an ext
 </div>
 <script type="text/x-magento-init">
  {
-   "#example-placeholder": {
+   "#custom-placeholder": {
      "vueapp": {
        "components": [ "CustomPlaceholderComponent" ],
        "placeholder": "custom"
@@ -399,9 +399,9 @@ Since we're now dealing with the placeholder directly, we need to include an ext
 </script>
 ```
 
-By setting this property, the app will now ignore any placeholder element within the block body.
+By setting this property, the app will now ignore any placeholder element within the block body, allowing you to handle it manually.
 
-#### Events
+#### Events ####
 
 Placeholders can also be affected by a given event. For that to happen we need to provide a `placeholder` value matching the `event:action` syntax:
 
@@ -475,7 +475,7 @@ export default {
 }
 ```
 
-### Importing Magento modules
+### Importing Magento modules ###
 
 There will be times that you'll have to access Javascript modules already provided by Magento. For example, you might need to generate changes on the DOM using *jQuery* or do a calculation using *Underscore*. We can achieve this by providing an extra option to the transpilation process. The Magento plugin used in `rollup.config.js` supports an option called `virtualDir` that allow us to simulate a generic import to a Javascript module. No real import is performed. Instead, the script, once transpiled, will state that it depends on those imported modules. The example below shows an entry setting the `virtualDir` option:
 
@@ -512,7 +512,7 @@ import { debounce } from '@magento/underscore';
 
 Once transpiled, the script will add any module you imported from the *virtual directory* to the list of dependencies. That way, we make sure the script will only run after those scripts are loaded.
 
-### Component libraries
+### Component libraries ###
 
 Another clever technique is putting all you components within a single file. This is useful for cases when you are reusing a lot of components on different pages. A library script would look like this:
 
@@ -585,22 +585,29 @@ In order to retrieve the components within a library we'll add a special syntax 
 </script>
 ```
 
-## Extras
+## Extras ##
 
-### Administration widgets
+### Production builds ###
+
+To produce an optimized build for all scripts (including Vue.js) run `npm run prod`. This will bundle all your assets using [Tercer](https://terser.org/), which will reduce its size.
+
+If you want to further customize your build process I would recommend checking [this post](https://dev.to/plebras/setting-up-a-javascript-build-process-using-rollup-n1e).
+
+### Administration widgets ###
 
 This module already comes with an administration widget called `WidgetProps`, which you can find in `assets/adminhtml/components`. This widget is the one responsible for storing the component props on the database. If you plan to change or add more administration widgets remember to properly clear the `adminhtml` cache as well (which will be located in `pub/static/adminhtml/THEME_DIR`). Otherwise you might not see any changes during development.
 
 As an additional note, the `Widget\Instance` class on the `Magento_Widget` module is overriden to allow props to be provided as an object once they are pushed to frontend. Check out the `Vue\Widget\Model\Widget\Intance` class for details.
 
-### Logs
+### Logs ###
 
 This module implements a simple logger class that can be injected into any block through dependency injection. Many of the examples use this class to generate debugging messages. You can find these messages on `var/log/vuewidget.log`. Remember to activate *developer mode* before starting.
 
-## TODOs
+## Changelog ##
 
- - [ ] Production builds.
+ - 1.0.0: First release.
+ - 1.1.0: Added: support for production builds.
 
-## License
+## License ##
 
 Vue.js is copyrighted by Evan You and distributed under the terms of the MIT license. Everything else included on this repo is distributed under the MIT license.
